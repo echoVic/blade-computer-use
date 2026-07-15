@@ -6,9 +6,9 @@ import test from 'node:test'
 const root = path.resolve(import.meta.dirname, '..')
 
 test('server closes the persistent helper when MCP stdin ends', async () => {
-  const child = spawn(path.join(root, 'bin/blade-computer-use'), [], {
+  const child = spawn(process.execPath, [path.join(root, 'dist/blade-computer-use.mjs')], {
     cwd: root,
-    env: { ...process.env, PATH: '/usr/bin:/bin:/usr/sbin:/sbin' },
+    env: { ...process.env, BLADE_COMPUTER_USE_HELPER: '/usr/bin/true' },
     stdio: ['pipe', 'pipe', 'pipe'],
   })
   let stderr = ''

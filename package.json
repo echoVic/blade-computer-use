@@ -12,9 +12,11 @@
     "test": "tsx --test",
     "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.test.json",
     "build:ts": "tsc",
+    "bundle": "esbuild src/server.ts --bundle --platform=node --format=esm --target=node20 --outfile=dist/blade-computer-use.mjs",
     "build:native": "swift build --package-path native/BladeComputerUseHelper -c release",
-    "build": "npm run build:ts && npm run build:native",
-    "smoke:mcp": "npm run build:ts && node tests/smoke-mcp.mjs",
+    "test:native": "swift run --package-path native/BladeComputerUseHelper BladeComputerUseHelperSelfTest",
+    "build": "npm run build:ts && npm run bundle && npm run build:native",
+    "smoke:mcp": "npm run bundle && node tests/smoke-mcp.mjs",
     "validate:manifests": "node scripts/validate-manifests.mjs",
     "start": "node dist/server.js"
   },
@@ -24,7 +26,13 @@
   },
   "devDependencies": {
     "@types/node": "24.10.1",
+    "esbuild": "0.28.1",
     "tsx": "4.21.0",
     "typescript": "7.0.2"
+  },
+  "overrides": {
+    "tsx": {
+      "esbuild": "0.28.1"
+    }
   }
 }

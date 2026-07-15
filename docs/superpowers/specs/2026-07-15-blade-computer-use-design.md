@@ -143,11 +143,11 @@ Errors use stable codes: `permission_denied`, `app_not_allowed`, `app_not_found`
 
 ### Codex
 
-`.codex-plugin/plugin.json` declares the skill and points to `.codex-plugin/mcp.json`. The MCP configuration launches the repository's wrapper script, which resolves its own installation path before starting `dist/server.js`.
+`.codex-plugin/plugin.json` declares the skill and points to the shared root `.mcp.json`. A repository marketplace entry makes the root plugin installable with `codex plugin marketplace add`. The MCP configuration launches the wrapper, which resolves its installation path, builds the native helper on first use, and starts the committed `dist/blade-computer-use.mjs` bundle.
 
 ### Claude Code
 
-`.claude-plugin/plugin.json` declares plugin metadata. Root `.mcp.json` launches the same wrapper using `${CLAUDE_PLUGIN_ROOT}`. The root `skills/` directory contains the shared computer-use instructions.
+`.claude-plugin/plugin.json` declares plugin metadata. Root `.mcp.json` launches the same wrapper using `${CLAUDE_PLUGIN_ROOT}` with a current-directory fallback for Codex. The root `skills/` directory contains the shared computer-use instructions.
 
 ### Orca
 

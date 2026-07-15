@@ -1,0 +1,20 @@
+{
+  "name": "blade-computer-use",
+  "interface": {
+    "displayName": "Blade Computer Use"
+  },
+  "plugins": [
+    {
+      "name": "blade-computer-use",
+      "source": {
+        "source": "local",
+        "path": "."
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Developer Tools"
+    }
+  ]
+}

@@ -6,8 +6,7 @@ import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js'
 
 const root = path.resolve(import.meta.dirname, '..')
 const transport = new StdioClientTransport({
-  command: process.execPath,
-  args: [path.join(root, 'dist/server.js')],
+  command: path.join(root, 'bin/blade-computer-use'),
   cwd: root,
   stderr: 'pipe',
 })

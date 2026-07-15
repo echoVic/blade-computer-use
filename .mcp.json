@@ -6,7 +6,10 @@
         "-c",
         "exec \"${CLAUDE_PLUGIN_ROOT:-.}/bin/blade-computer-use\""
       ],
-      "cwd": "."
+      "cwd": ".",
+      "env": {
+        "CUA_ALLOWED_APPS": "com.apple.TextEdit"
+      }
     }
   }
 }

@@ -10,6 +10,7 @@ const readJson = async (relativePath) =>
 const codex = await readJson('.codex-plugin/plugin.json')
 const sharedMcp = await readJson('.mcp.json')
 const claude = await readJson('.claude-plugin/plugin.json')
+const marketplace = await readJson('.agents/plugins/marketplace.json')
 
 assert.equal(codex.name, 'blade-computer-use')
 assert.equal(codex.version, '0.1.0')
@@ -17,6 +18,8 @@ assert.equal(codex.skills, './skills/')
 assert.equal(codex.mcpServers, './.mcp.json')
 assert.equal(claude.name, codex.name)
 assert.equal(claude.version, codex.version)
+assert.equal(marketplace.name, 'blade-computer-use')
+assert.equal(marketplace.plugins[0].source.path, '.')
 assert.equal(
   sharedMcp.mcpServers['blade-computer-use'].command,
   'sh',

@@ -72,9 +72,9 @@ git commit -m "feat: add policy and revision core"
 - Create: `tests/fixtures/helper.mjs`
 - Test: `tests/helper-client.test.ts`
 - Create: `native/BladeComputerUseHelper/Package.swift`
-- Create: `native/BladeComputerUseHelper/Sources/BladeComputerUseHelper/Protocol.swift`
+- Create: `native/BladeComputerUseHelper/Sources/BladeComputerUseCore/Protocol.swift`
 - Create: `native/BladeComputerUseHelper/Sources/BladeComputerUseHelper/main.swift`
-- Test: `native/BladeComputerUseHelper/Tests/BladeComputerUseHelperTests/ProtocolTests.swift`
+- Test: `native/BladeComputerUseHelper/Sources/BladeComputerUseHelperSelfTest/main.swift`
 
 - [ ] **Step 1: Write a failing Node helper-client test**
 
@@ -90,14 +90,12 @@ Expected: FAIL because `NativeHelperClient` is not implemented.
 
 Use `spawn`, `readline.createInterface`, monotonically increasing string IDs, a pending promise map, stderr forwarding, and rejection of all pending calls when the helper exits.
 
-- [ ] **Step 4: Write Swift protocol tests before the protocol types**
+- [ ] **Step 4: Write Swift self-tests before the protocol types**
 
 ```swift
-func testRequestRoundTrip() throws {
-    let request = HelperRequest(id: "1", method: "list_apps", params: [:])
-    let data = try JSONEncoder().encode(request)
-    XCTAssertEqual(try JSONDecoder().decode(HelperRequest.self, from: data), request)
-}
+let request = HelperRequest(id: "1", method: "list_apps", params: [:])
+let data = try JSONEncoder().encode(request)
+check(try JSONDecoder().decode(HelperRequest.self, from: data) == request)
 ```
 
 - [ ] **Step 5: Implement Codable request/response envelopes and the stdin loop**
@@ -110,7 +108,7 @@ Run:
 
 ```bash
 npm test -- tests/helper-client.test.ts
-swift test --package-path native/BladeComputerUseHelper
+npm run test:native
 ```
 
 Expected: both suites pass.
@@ -126,14 +124,13 @@ git commit -m "feat: add native helper protocol"
 
 **Files:**
 
-- Create: `native/BladeComputerUseHelper/Sources/BladeComputerUseHelper/AXTree.swift`
-- Create: `native/BladeComputerUseHelper/Sources/BladeComputerUseHelper/Models.swift`
-- Create: `native/BladeComputerUseHelper/Sources/BladeComputerUseHelper/NativeService.swift`
-- Create: `native/BladeComputerUseHelper/Sources/BladeComputerUseHelper/ScreenCapture.swift`
-- Create: `native/BladeComputerUseHelper/Sources/BladeComputerUseHelper/Input.swift`
+- Create: `native/BladeComputerUseHelper/Sources/BladeComputerUseCore/AXTree.swift`
+- Create: `native/BladeComputerUseHelper/Sources/BladeComputerUseCore/Models.swift`
+- Create: `native/BladeComputerUseHelper/Sources/BladeComputerUseCore/NativeService.swift`
+- Create: `native/BladeComputerUseHelper/Sources/BladeComputerUseCore/ScreenCapture.swift`
+- Create: `native/BladeComputerUseHelper/Sources/BladeComputerUseCore/Input.swift`
 - Modify: `native/BladeComputerUseHelper/Sources/BladeComputerUseHelper/main.swift`
-- Test: `native/BladeComputerUseHelper/Tests/BladeComputerUseHelperTests/AXTreeTests.swift`
-- Test: `native/BladeComputerUseHelper/Tests/BladeComputerUseHelperTests/InputTests.swift`
+- Test: `native/BladeComputerUseHelper/Sources/BladeComputerUseHelperSelfTest/main.swift`
 
 - [ ] **Step 1: Write failing pure tests for tree limits and key mapping**
 
@@ -141,7 +138,7 @@ Use a synthetic `AXNodeSource` tree to prove depth 12, node count 500, determini
 
 - [ ] **Step 2: Run Swift tests and observe missing native modules**
 
-Run: `swift test --package-path native/BladeComputerUseHelper`
+Run: `npm run test:native`
 
 Expected: FAIL because serializer and key mapper types are absent.
 
@@ -166,7 +163,7 @@ Methods are `list_apps`, `observe`, `click`, `type_text`, `press_key`, and `scro
 Run:
 
 ```bash
-swift test --package-path native/BladeComputerUseHelper
+npm run test:native
 swift build --package-path native/BladeComputerUseHelper -c release
 ```
 
@@ -232,7 +229,7 @@ git commit -m "feat: expose computer use over mcp"
 **Files:**
 
 - Create: `.codex-plugin/plugin.json`
-- Create: `.codex-plugin/mcp.json`
+- Create: `.agents/plugins/marketplace.json`
 - Create: `.claude-plugin/plugin.json`
 - Create: `.mcp.json`
 - Create: `skills/computer-use/SKILL.md`
@@ -244,7 +241,7 @@ git commit -m "feat: expose computer use over mcp"
 
 - [ ] **Step 1: Write failing manifest and wrapper tests**
 
-Validate JSON syntax, names/versions, referenced files, executable wrapper mode, Codex MCP path, Claude `${CLAUDE_PLUGIN_ROOT}` path, and the six tool names in the shared skill.
+Validate JSON syntax, names/versions, the repository marketplace entry, executable wrapper mode, shared root MCP config, Claude `${CLAUDE_PLUGIN_ROOT}` fallback, and the six tool names in the shared skill.
 
 - [ ] **Step 2: Run the manifest tests and observe missing-file failures**
 
@@ -254,7 +251,7 @@ Expected: FAIL listing the missing plugin files.
 
 - [ ] **Step 3: Create both plugin manifests, MCP configs, wrapper, skill, and Orca example**
 
-The wrapper resolves the repository root, sets the default helper path, and executes `node dist/server.js`. The skill requires observe after every action and warns about impactful actions.
+The wrapper resolves the repository root, builds the Swift helper on first use, and executes the committed `dist/blade-computer-use.mjs` bundle. The skill requires observe after every action and warns about impactful actions.
 
 - [ ] **Step 4: Validate manifests and start the built server through the wrapper**
 
@@ -291,7 +288,7 @@ Document requirements, permissions, build, the three install paths, allowlist ex
 
 - [ ] **Step 2: Add macOS CI**
 
-CI installs Node dependencies, runs Node tests/typecheck/build, and runs `swift test` plus release build on `macos-14`.
+CI installs Node dependencies, runs Node tests/typecheck/build, and runs the framework-free Swift self-test plus release build on `macos-14`.
 
 - [ ] **Step 3: Run the complete verification suite**
 
@@ -303,7 +300,7 @@ npm test
 npm run typecheck
 npm run build
 npm run validate:manifests
-swift test --package-path native/BladeComputerUseHelper
+npm run test:native
 git diff --check
 ```
 

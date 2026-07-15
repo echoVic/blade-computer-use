@@ -1,5 +1,5 @@
 [[mcp_servers]]
-name = "blade-computer-use"
+name = "blade_computer_use"
 transport = "stdio"
 command = "/absolute/path/to/blade-computer-use/bin/blade-computer-use"
 args = []

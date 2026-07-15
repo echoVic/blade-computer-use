@@ -3,11 +3,16 @@ set -eu
 
 ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 HELPER="$ROOT/native/BladeComputerUseHelper/.build/release/BladeComputerUseHelper"
-SERVER="$ROOT/dist/server.js"
+SERVER="$ROOT/dist/blade-computer-use.mjs"
 
-if [ ! -f "$SERVER" ] || [ ! -x "$HELPER" ]; then
-  echo "blade-computer-use is not built; run npm install && npm run build in $ROOT" >&2
+if [ ! -f "$SERVER" ]; then
+  echo "blade-computer-use bundle is missing; reinstall the plugin or run npm run bundle" >&2
   exit 1
+fi
+
+if [ ! -x "$HELPER" ]; then
+  echo "Building the blade-computer-use native helper for this Mac..." >&2
+  "$ROOT/scripts/build-native.sh" 1>&2
 fi
 
 export BLADE_COMPUTER_USE_HELPER="${BLADE_COMPUTER_USE_HELPER:-$HELPER}"

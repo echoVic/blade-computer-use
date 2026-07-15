@@ -1,0 +1,5 @@
+node_modules/
+dist/
+native/BladeComputerUseHelper/.build/
+.DS_Store
+*.log

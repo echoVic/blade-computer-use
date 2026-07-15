@@ -1,0 +1,28 @@
+{
+  "name": "blade-computer-use",
+  "version": "0.1.0",
+  "description": "Agent-neutral macOS computer use over MCP",
+  "type": "module",
+  "private": true,
+  "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "test": "tsx --test",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.test.json",
+    "build:ts": "tsc",
+    "build:native": "swift build --package-path native/BladeComputerUseHelper -c release",
+    "build": "npm run build:ts && npm run build:native",
+    "start": "node dist/server.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "1.29.0",
+    "zod": "4.4.3"
+  },
+  "devDependencies": {
+    "@types/node": "24.10.1",
+    "tsx": "4.21.0",
+    "typescript": "7.0.2"
+  }
+}

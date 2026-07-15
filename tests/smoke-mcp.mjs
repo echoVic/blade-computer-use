@@ -11,6 +11,7 @@ const transport = new StdioClientTransport({
   cwd: root,
   stderr: 'pipe',
 })
+transport.stderr?.on('data', (chunk) => process.stderr.write(chunk))
 const client = new Client({ name: 'blade-computer-use-smoke', version: '0.1.0' })
 
 try {

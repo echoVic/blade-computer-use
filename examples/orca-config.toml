@@ -1,0 +1,8 @@
+[[mcp_servers]]
+name = "blade-computer-use"
+transport = "stdio"
+command = "/absolute/path/to/blade-computer-use/bin/blade-computer-use"
+args = []
+env = { CUA_ALLOWED_APPS = "com.apple.TextEdit" }
+startup_timeout_ms = 10000
+tool_timeout_ms = 30000

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Computer Use"
+  short_description: "Control allowed macOS apps through MCP tools"
+  default_prompt: "Use $computer-use to inspect and operate an allowed macOS app."

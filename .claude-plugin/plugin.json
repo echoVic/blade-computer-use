@@ -1,0 +1,11 @@
+{
+  "name": "blade-computer-use",
+  "version": "0.1.0",
+  "description": "Agent-neutral macOS computer use over MCP.",
+  "author": {
+    "name": "echoVic",
+    "url": "https://github.com/echoVic"
+  },
+  "repository": "https://github.com/echoVic/blade-computer-use",
+  "license": "MIT"
+}

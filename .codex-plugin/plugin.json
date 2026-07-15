@@ -1,0 +1,38 @@
+{
+  "name": "blade-computer-use",
+  "version": "0.1.0",
+  "description": "Agent-neutral macOS computer use over MCP.",
+  "author": {
+    "name": "echoVic",
+    "url": "https://github.com/echoVic"
+  },
+  "homepage": "https://github.com/echoVic/blade-computer-use",
+  "repository": "https://github.com/echoVic/blade-computer-use",
+  "license": "MIT",
+  "keywords": [
+    "computer-use",
+    "mcp",
+    "macos",
+    "accessibility",
+    "automation"
+  ],
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json",
+  "interface": {
+    "displayName": "Blade Computer Use",
+    "shortDescription": "Control explicitly allowed macOS apps",
+    "longDescription": "Observe and control explicitly allowed macOS applications through a local, agent-neutral MCP server. The plugin combines an accessibility tree, screenshots, revision-bound actions, and a persistent native helper without telemetry.",
+    "developerName": "echoVic",
+    "category": "Developer Tools",
+    "capabilities": [
+      "Interactive",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/echoVic/blade-computer-use",
+    "defaultPrompt": [
+      "Inspect TextEdit and help me edit the open document"
+    ],
+    "brandColor": "#1F6F5B",
+    "screenshots": []
+  }
+}

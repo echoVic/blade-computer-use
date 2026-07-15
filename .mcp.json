@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "blade-computer-use": {
+      "command": "sh",
+      "args": [
+        "-c",
+        "exec \"${CLAUDE_PLUGIN_ROOT:-.}/bin/blade-computer-use\""
+      ],
+      "cwd": "."
+    }
+  }
+}

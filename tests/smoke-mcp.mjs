@@ -5,8 +5,9 @@ import { Client } from '@modelcontextprotocol/sdk/client/index.js'
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js'
 
 const root = path.resolve(import.meta.dirname, '..')
+const command = process.env.BLADE_MCP_COMMAND ?? path.join(root, 'bin/blade-computer-use')
 const transport = new StdioClientTransport({
-  command: path.join(root, 'bin/blade-computer-use'),
+  command,
   cwd: root,
   stderr: 'pipe',
 })

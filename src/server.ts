@@ -26,7 +26,7 @@ const helperPath =
 const helper = new NativeHelperClient(helperPath)
 const service = new ToolService(helper, createPolicy())
 const server = new Server(
-  { name: 'blade-computer-use', version: '0.1.0' },
+  { name: 'blade-computer-use', version: '0.1.1' },
   { capabilities: { tools: {} } },
 )
 

@@ -25,6 +25,8 @@ test('public docs cover installation, permissions, policy, and limits', async ()
     assert.match(readme, new RegExp(term, 'i'))
   }
   assert.match(readme, /not an OpenAI product/i)
+  assert.match(readme, /first `observe` requests Accessibility and Screen Recording/i)
+  assert.match(readme, /screen_recording_trusted/)
   assert.match(security, /security vulnerability/i)
   assert.match(security, /revision/i)
   assert.match(license, /MIT License/)

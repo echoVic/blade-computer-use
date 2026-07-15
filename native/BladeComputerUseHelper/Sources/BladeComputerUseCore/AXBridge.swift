@@ -76,6 +76,56 @@ final class AXTreeReader {
         stringAttribute(element, kAXRoleAttribute) ?? "AXUnknown"
     }
 
+    func value(of element: AXUIElement) -> String? {
+        displayValue(attribute(element, kAXValueAttribute))
+    }
+
+    func selectedTextLength(of element: AXUIElement) -> Int? {
+        guard
+            let value = attribute(element, kAXSelectedTextRangeAttribute),
+            CFGetTypeID(value) == AXValueGetTypeID(),
+            AXValueGetType(value as! AXValue) == .cfRange
+        else {
+            return nil
+        }
+
+        var range = CFRange()
+        guard AXValueGetValue(value as! AXValue, .cfRange, &range) else {
+            return nil
+        }
+        return range.length
+    }
+
+    func waitForValueChange(
+        of element: AXUIElement,
+        from initialValue: String,
+        expectedUTF16Count: Int?,
+        timeout: TimeInterval = 2,
+        quietPeriod: TimeInterval = 0.15
+    ) -> Bool {
+        let deadline = Date().addingTimeInterval(timeout)
+        var lastValue = initialValue
+        var lastChange: Date?
+
+        while Date() < deadline {
+            if let currentValue = value(of: element), currentValue != lastValue {
+                lastValue = currentValue
+                lastChange = Date()
+            }
+            let reachedExpectedLength = expectedUTF16Count.map {
+                lastValue.utf16.count == $0
+            } ?? true
+            if lastValue != initialValue,
+               reachedExpectedLength,
+               let lastChange,
+               Date().timeIntervalSince(lastChange) >= quietPeriod {
+                return true
+            }
+            RunLoop.current.run(until: Date().addingTimeInterval(0.02))
+        }
+        return lastValue != initialValue
+    }
+
     func focusedElement(processID: pid_t) -> AXUIElement? {
         let app = AXUIElementCreateApplication(processID)
         return elementAttribute(app, kAXFocusedUIElementAttribute)

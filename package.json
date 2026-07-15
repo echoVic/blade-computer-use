@@ -1,6 +1,6 @@
 {
   "name": "blade-computer-use",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Agent-neutral macOS computer use over MCP",
   "type": "module",
   "private": true,
@@ -15,6 +15,7 @@
     "bundle": "esbuild src/server.ts --bundle --platform=node --format=esm --target=node20 --outfile=dist/blade-computer-use.mjs",
     "build:native": "swift build --package-path native/BladeComputerUseHelper -c release",
     "test:native": "swift run --package-path native/BladeComputerUseHelper BladeComputerUseHelperSelfTest",
+    "test:manual:textedit": "npm run build && node tests/manual-textedit.mjs",
     "build": "npm run build:ts && npm run bundle && npm run build:native",
     "smoke:mcp": "npm run bundle && node tests/smoke-mcp.mjs",
     "validate:manifests": "node scripts/validate-manifests.mjs",

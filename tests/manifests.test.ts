@@ -14,17 +14,22 @@ async function json(relativePath: string): Promise<Record<string, unknown>> {
 }
 
 test('Codex and Claude manifests launch the shared wrapper', async () => {
+  const packageManifest = await json('package.json')
   const codex = await json('.codex-plugin/plugin.json')
   const sharedMcp = await json('.mcp.json')
   const claude = await json('.claude-plugin/plugin.json')
   const marketplace = await json('.agents/plugins/marketplace.json')
 
   assert.equal(codex.name, 'blade-computer-use')
-  assert.equal(codex.version, '0.1.0')
+  assert.equal(packageManifest.version, '0.1.1')
+  assert.equal(codex.version, packageManifest.version)
   assert.equal(codex.mcpServers, './.mcp.json')
   assert.equal(codex.skills, './skills/')
   assert.equal(claude.name, 'blade-computer-use')
-  assert.equal(claude.version, '0.1.0')
+  assert.equal(claude.version, packageManifest.version)
+
+  const serverSource = await readFile(path.join(root, 'src/server.ts'), 'utf8')
+  assert.match(serverSource, /version: '0\.1\.1'/)
 
   const plugins = marketplace.plugins as Array<{
     name: string

@@ -1,5 +1,8 @@
+import AppKit
 import Foundation
 import BladeComputerUseCore
+
+_ = NSApplication.shared
 
 let decoder = JSONDecoder()
 let encoder = JSONEncoder()

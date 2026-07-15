@@ -13,7 +13,7 @@ const claude = await readJson('.claude-plugin/plugin.json')
 const marketplace = await readJson('.agents/plugins/marketplace.json')
 
 assert.equal(codex.name, 'blade-computer-use')
-assert.equal(codex.version, '0.1.0')
+assert.equal(codex.version, '0.1.1')
 assert.equal(codex.skills, './skills/')
 assert.equal(codex.mcpServers, './.mcp.json')
 assert.equal(claude.name, codex.name)

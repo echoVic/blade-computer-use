@@ -25131,7 +25131,7 @@ var helperPath = process.env.BLADE_COMPUTER_USE_HELPER ?? path.join(
 var helper = new NativeHelperClient(helperPath);
 var service = new ToolService(helper, createPolicy());
 var server = new Server(
-  { name: "blade-computer-use", version: "0.1.0" },
+  { name: "blade-computer-use", version: "0.1.1" },
   { capabilities: { tools: {} } }
 );
 server.setRequestHandler(ListToolsRequestSchema, async () => ({

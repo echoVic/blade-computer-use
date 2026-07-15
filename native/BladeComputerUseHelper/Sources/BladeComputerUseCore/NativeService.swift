@@ -13,9 +13,12 @@ private struct NativeSnapshot {
 @MainActor
 public final class NativeService {
     private let reader = AXTreeReader()
+    private let permissionGate: PermissionGate
     private var snapshots: [String: NativeSnapshot] = [:]
 
-    public init() {}
+    public init(permissionChecker: any PermissionChecking = SystemPermissionChecker()) {
+        permissionGate = PermissionGate(checker: permissionChecker)
+    }
 
     public func handle(method: String, params: [String: JSONValue]) async throws -> JSONValue {
         switch method {
@@ -31,7 +34,7 @@ public final class NativeService {
     }
 
     private func listApps() -> JSONValue {
-        let trusted = AXIsProcessTrusted()
+        let permissions = permissionGate.status(includeScreenshot: true, prompt: false)
         let apps = NSWorkspace.shared.runningApplications
             .filter { $0.activationPolicy == .regular && !$0.isTerminated }
             .sorted { ($0.localizedName ?? "") < ($1.localizedName ?? "") }
@@ -40,14 +43,22 @@ public final class NativeService {
                     "name": .string(app.localizedName ?? app.bundleIdentifier ?? "Unknown"),
                     "bundle_id": .string(app.bundleIdentifier ?? ""),
                     "pid": .number(Double(app.processIdentifier)),
-                    "has_window": .bool(trusted && reader.hasWindow(processID: app.processIdentifier)),
+                    "has_window": .bool(
+                        permissions.accessibilityTrusted
+                            && reader.hasWindow(processID: app.processIdentifier)
+                    ),
                 ])
             }
-        return .object(["apps": .array(apps), "accessibility_trusted": .bool(trusted)])
+        return .object([
+            "apps": .array(apps),
+            "accessibility_trusted": .bool(permissions.accessibilityTrusted),
+            "screen_recording_trusted": .bool(permissions.screenRecordingTrusted),
+        ])
     }
 
     private func observe(_ params: [String: JSONValue]) async throws -> JSONValue {
-        try requireAccessibility()
+        let includeScreenshot = params["include_screenshot"]?.boolValue ?? true
+        try permissionGate.require(includeScreenshot: includeScreenshot, prompt: true)
         let appID = try params.requiredString("app")
         let app = try application(bundleID: appID)
         let observation = try reader.observe(processID: app.processIdentifier)
@@ -71,7 +82,7 @@ public final class NativeService {
             "ax_tree": .string(observation.tree.lines.joined(separator: "\n")),
             "truncated": .bool(observation.tree.truncated),
         ]
-        if params["include_screenshot"]?.boolValue ?? true {
+        if includeScreenshot {
             result["screenshot_path"] = .string(
                 try await WindowScreenshot.capture(
                     processID: app.processIdentifier,
@@ -99,7 +110,7 @@ public final class NativeService {
                 in: snapshot.bounds
             )
         }
-        activate(appID)
+        try activate(appID)
         try NativeInput.click(
             point: point,
             button: params["button"]?.stringValue ?? "left",
@@ -117,15 +128,32 @@ public final class NativeService {
         guard !isSecureRole(role) else {
             throw HelperError(code: "secure_input_denied", message: "Typing into secure fields is denied.")
         }
-        activate(appID)
-        NativeInput.typeText(try params.requiredString("text"))
+        let text = try params.requiredString("text")
+        let initialValue = reader.value(of: focused)
+        let selectedTextLength = reader.selectedTextLength(of: focused)
+        try activate(appID)
+        NativeInput.typeText(text)
+        if !text.isEmpty,
+           let initialValue,
+           !reader.waitForValueChange(
+               of: focused,
+               from: initialValue,
+               expectedUTF16Count: selectedTextLength.map {
+                   initialValue.utf16.count - $0 + text.utf16.count
+               }
+           ) {
+            throw HelperError(
+                code: "input_not_applied",
+                message: "The focused element did not reflect the requested text input. Observe again before retrying."
+            )
+        }
         return actionResult(revision)
     }
 
     private func pressKey(_ params: [String: JSONValue]) throws -> JSONValue {
         let (appID, revision, _) = try consume(params)
         let modifiers = params["modifiers"]?.arrayValue?.compactMap(\.stringValue) ?? []
-        activate(appID)
+        try activate(appID)
         try NativeInput.pressKey(try params.requiredString("key"), modifiers: modifiers)
         return actionResult(revision)
     }
@@ -146,7 +174,7 @@ public final class NativeService {
                 y: snapshot.bounds.y + snapshot.bounds.height / 2
             )
         }
-        activate(appID)
+        try activate(appID)
         NativeInput.scroll(
             point: point,
             deltaX: params["delta_x"]?.numberValue ?? 0,
@@ -182,16 +210,18 @@ public final class NativeService {
         return app
     }
 
-    private func activate(_ bundleID: String) {
-        NSRunningApplication.runningApplications(withBundleIdentifier: bundleID).first?.activate()
-    }
+    private func activate(_ bundleID: String) throws {
+        let app = try application(bundleID: bundleID)
+        guard app.activate() else {
+            throw HelperError(code: "app_activation_failed", message: "Could not activate \(bundleID).")
+        }
 
-    private func requireAccessibility() throws {
-        guard AXIsProcessTrusted() else {
-            throw HelperError(
-                code: "permission_denied",
-                message: "Accessibility permission is required for the current terminal or agent host."
-            )
+        let deadline = Date().addingTimeInterval(1)
+        while !app.isActive, Date() < deadline {
+            RunLoop.current.run(until: Date().addingTimeInterval(0.02))
+        }
+        guard app.isActive else {
+            throw HelperError(code: "app_activation_failed", message: "\(bundleID) did not become active.")
         }
     }
 

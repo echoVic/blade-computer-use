@@ -33,7 +33,7 @@ Accessibility tree     window screenshot      mouse/keyboard input
 - macOS 14 or newer
 - Node.js 20 or newer
 - Swift 5.10 or newer and the Xcode Command Line Tools (`xcode-select --install`)
-- Accessibility and Screen Recording permission for the terminal or agent host running the plugin
+- Accessibility and Screen Recording permission for `BladeComputerUseHelper` or the agent host macOS attributes it to
 
 The first plugin launch compiles the native helper for the current Mac. The TypeScript MCP server is already committed as a standalone bundle, so runtime installation does not run `npm install`.
 
@@ -84,12 +84,14 @@ Copy [the Orca MCP example](./examples/orca-config.toml) into Orca's configurati
 
 ## Permissions
 
-Open **System Settings > Privacy & Security** and grant:
+The first `observe` requests Accessibility and Screen Recording through the macOS system APIs. The user must approve both permissions; the plugin cannot toggle security settings on the user's behalf.
 
-1. **Accessibility** to the terminal, Codex, Claude Code, or other host that starts the helper.
-2. **Screen Recording** to the same host.
+If macOS opens **System Settings > Privacy & Security**, grant:
 
-Restart the host after changing permissions. `list_apps` reports `accessibility_trusted`; `observe` returns a permission error instead of prompting or bypassing macOS controls.
+1. **Accessibility** to `BladeComputerUseHelper`, or to the terminal/Codex/Claude host shown by macOS.
+2. **Screen Recording** to the same executable shown by macOS.
+
+Restart the plugin host after changing permissions, then retry `observe`. `list_apps` reports both `accessibility_trusted` and `screen_recording_trusted`; a denied request returns `permission_denied` with the missing permission names.
 
 ## TextEdit smoke test
 
@@ -99,6 +101,14 @@ Restart the host after changing permissions. `list_apps` reports `accessibility_
 4. Ask it to click the editor, type a short line, and verify the result.
 
 The expected loop is `observe -> one action -> observe`. A stale or already-consumed revision must not be retried.
+
+With an empty TextEdit document focused and both permissions granted, run the live integration check:
+
+```bash
+npm run test:manual:textedit
+```
+
+This opt-in test verifies AX observation, two PNG responses, Unicode input, one-shot revision rejection, and the final AX text. It is not part of CI because it requires an interactive macOS session and user-granted permissions.
 
 ## Security and privacy
 
@@ -138,6 +148,8 @@ The native checks use a framework-free self-test executable because a Command Li
 ```bash
 npm run test:native
 ```
+
+The self-test currently covers 22 protocol, AX serialization, input, coordinate, and permission-gate checks.
 
 ## License
 

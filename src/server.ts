@@ -64,10 +64,16 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 const transport = new StdioServerTransport()
 await server.connect(transport)
 
-async function shutdown(): Promise<void> {
-  await helper.close()
-  await server.close()
+let shutdownPromise: Promise<void> | undefined
+
+function shutdown(): Promise<void> {
+  shutdownPromise ??= (async () => {
+    await helper.close()
+    await server.close()
+  })()
+  return shutdownPromise
 }
 
+process.stdin.once('end', () => void shutdown())
 process.once('SIGINT', () => void shutdown())
 process.once('SIGTERM', () => void shutdown())

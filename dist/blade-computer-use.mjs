@@ -25164,9 +25164,14 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 });
 var transport = new StdioServerTransport();
 await server.connect(transport);
-async function shutdown() {
-  await helper.close();
-  await server.close();
+var shutdownPromise;
+function shutdown() {
+  shutdownPromise ??= (async () => {
+    await helper.close();
+    await server.close();
+  })();
+  return shutdownPromise;
 }
+process.stdin.once("end", () => void shutdown());
 process.once("SIGINT", () => void shutdown());
 process.once("SIGTERM", () => void shutdown());

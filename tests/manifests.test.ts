@@ -62,6 +62,8 @@ test('wrapper is executable and bootstraps the native helper from the bundled se
 
   const wrapper = await readFile(wrapperPath, 'utf8')
   assert.match(wrapper, /BLADE_COMPUTER_USE_HELPER/)
+  assert.match(wrapper, /BLADE_NODE_PATH/)
+  assert.match(wrapper, /ChatGPT\.app\/Contents\/Resources\/cua_node\/bin\/node/)
   assert.match(wrapper, /scripts\/build-native\.sh/)
   assert.match(wrapper, /dist\/blade-computer-use\.mjs/)
   await access(path.join(root, 'dist/blade-computer-use.mjs'), constants.R_OK)

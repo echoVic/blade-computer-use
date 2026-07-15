@@ -4,6 +4,29 @@ set -eu
 ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 HELPER="$ROOT/native/BladeComputerUseHelper/.build/release/BladeComputerUseHelper"
 SERVER="$ROOT/dist/blade-computer-use.mjs"
+NODE=${BLADE_NODE_PATH:-}
+
+if [ -z "$NODE" ] && command -v node >/dev/null 2>&1; then
+  NODE=$(command -v node)
+fi
+
+if [ -z "$NODE" ]; then
+  for candidate in \
+    /opt/homebrew/bin/node \
+    /usr/local/bin/node \
+    "/Applications/ChatGPT.app/Contents/Resources/cua_node/bin/node"
+  do
+    if [ -x "$candidate" ]; then
+      NODE=$candidate
+      break
+    fi
+  done
+fi
+
+if [ -z "$NODE" ] || [ ! -x "$NODE" ]; then
+  echo "Node.js 20 or newer is required; set BLADE_NODE_PATH to its executable" >&2
+  exit 1
+fi
 
 if [ ! -f "$SERVER" ]; then
   echo "blade-computer-use bundle is missing; reinstall the plugin or run npm run bundle" >&2
@@ -16,4 +39,4 @@ if [ ! -x "$HELPER" ]; then
 fi
 
 export BLADE_COMPUTER_USE_HELPER="${BLADE_COMPUTER_USE_HELPER:-$HELPER}"
-exec node "$SERVER"
+exec "$NODE" "$SERVER"

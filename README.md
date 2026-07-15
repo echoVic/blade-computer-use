@@ -32,7 +32,7 @@ Accessibility tree     window screenshot      mouse/keyboard input
 
 - macOS 14 or newer
 - Node.js 20 or newer
-- Swift 6.2 and the Xcode Command Line Tools (`xcode-select --install`)
+- Swift 5.10 or newer and the Xcode Command Line Tools (`xcode-select --install`)
 - Accessibility and Screen Recording permission for the terminal or agent host running the plugin
 
 The first plugin launch compiles the native helper for the current Mac. The TypeScript MCP server is already committed as a standalone bundle, so runtime installation does not run `npm install`.
